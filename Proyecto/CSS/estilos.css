@@ -1,0 +1,135 @@
+/*  Estilos Generales  */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+}
+
+header {
+    background-color: #004080;
+    color: white;
+    padding: 15px;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+}
+
+nav {
+    background-color: #0066cc;
+    text-align: center;
+    padding: 10px;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    margin: 10px;
+    font-weight: bold;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
+main {
+    padding: 30px;
+}
+
+/* Login  */
+.login {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 40px;
+}
+
+.login-card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+    box-shadow: 0 0 10px gray;
+}
+
+.login-card h2 {
+    text-align: center;
+}
+
+.login-card input {
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0 10px 0;
+    border: 1px solid hsl(0, 0%, 80%);
+    border-radius: 4px;
+}
+
+.login-card button {
+    background-color: #004080;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    width: 100%;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.login-card button:hover {
+    background-color: #003060;
+}
+
+/* Diagrama UML */
+.uml {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px gray;
+    margin-bottom: 40px;
+    text-align: center; 
+}
+
+.uml h2 {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.uml img {
+    max-width: 50%; 
+    height: 800px;
+    width: 600px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+/*Tablas (Estudiantes, Cursos, Profesores) */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+th,
+td {
+    border: 1px solid #ccc;
+    padding: 10px;
+}
+
+th {
+    background-color: #004080;
+    color: white;
+}
+
+tr:hover {
+    background-color: #ffe7e6;
+}
+
+/* Footer */
+footer {
+    background-color: #004080;
+    color: white;
+    text-align: center;
+    padding: 10px;
+}

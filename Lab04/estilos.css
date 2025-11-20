@@ -1,0 +1,126 @@
+body{
+      background-color: rgba(0, 0, 0, 0.623);
+    }
+    h1, h2{
+      color: white;
+      padding: 5px;
+    }
+
+    .header-titles {
+      margin: 30px 0 20px;
+    }
+
+    #main-title {
+      font-size: 2.5em;
+      border-bottom: 2px solid white;
+    }
+
+    .tittle {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+    }
+
+    .form-group label {
+      display: block;
+      margin-left: 5px;
+      font-weight: bold;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .submit-button {
+      margin-top: 10px;
+      padding: 10px 50px;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+      background-color: royalblue;
+      color: white;
+      text-transform: uppercase;
+      font-weight: bold;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    fieldset {
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 10px;
+      margin-bottom: 15px;
+    }
+
+    .submit-button:hover {
+      background-color: rgba(13, 159, 5, 0.385);
+      /* Un azul más oscuro al pasar el mouse */
+    }
+    #fondo {
+      background-image: url('/Lab03/img3.jpg');
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .menu, footer {
+      color: white;
+      background-color: rgba(13, 159, 5, 0.385);
+      padding: 10px 0;
+      border-radius: 8px;
+      margin: 20px 0px;
+      overflow: hidden;
+    }
+
+    .menu ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      border-radius: 5px;
+    }
+    .menu li {
+      margin: 0 15px;
+    }
+    .menu a {
+      color: white;
+      text-decoration: none;
+      padding: 12px 15px;
+      display: block;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+    .menu a:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+
+    #form-section {
+      margin: 20px auto;
+      padding: 20px;
+      background-color: rgb(255, 255, 255);
+      border-radius: 5px;
+      max-width: 500px;
+    }
+
+    #video-section {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    #video-section iframe {
+      border-radius: 10px;
+      max-width: 540px;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 14px;
+    }

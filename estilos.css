@@ -1,0 +1,32 @@
+body {
+    background-color: #1e1e1e;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    min-height: 100vh;
+    gap: 30px;
+}
+
+.cuadro {
+    width: 150px;
+    height: 150px;
+    border: 3px solid red;
+    border-radius: 20px;
+    background-color: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+.cuadro a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.cuadro:hover {
+    background-color: rgba(255, 0, 0, 0.1);
+}
