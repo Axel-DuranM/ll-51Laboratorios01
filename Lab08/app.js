@@ -52,7 +52,7 @@ async function cargarCursos() {
     cursos.forEach(curso => {
         let li = document.createElement("li");
         //li.textContent = curso.codigo + "-"+ curso.nombre;
-        li.innerHTML = `${curso.codigo} - ${curso.nombreCurso} [ ${curso.creditos} creditos] <button class="btn-delete" data-id="${curso.id}">Eliminar</button>`;
+        li.innerHTML = `${curso.codigo} - ${curso.nombreCurso} [ ${curso.creditos} creditos] <button class="btn-delete" data-id="${curso.idCurso}">Eliminar</button>`;
         listaCursos.appendChild(li);
     }
 );}
@@ -68,7 +68,7 @@ async function crearCurso(codigo, nombreCurso, creditos) {
 }
 async function eliminarCurso(idCurso) {
 
-    let { error } = await supabase.from("Cursos").delete().eq("id", idCurso);
+    let { error } = await supabase.from("Cursos").delete().eq("idCurso", idCurso);
     if (error) {
         console.error(error);
         statusDiv.textContent = "Error al eliminar el curso.";
