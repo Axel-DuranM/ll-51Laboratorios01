@@ -1,56 +1,146 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <title>Estudiantes - Universidad Central</title>
     <link rel="stylesheet" href="/Proyecto/CSS/estilos.css" />
-  </head>
-  <body>
-    <header>
-      <h1>Módulo de Estudiantes</h1>
-    </header>
 
-    <nav>
-      <a href="index.html">Inicio</a>
-      <a href="estudiantes.html">Estudiantes</a>
-      <a href="cursos.html">Cursos</a>
-      <a href="profesores.html">Profesores</a>
-    </nav>
+    <!-- Importar Supabase -->
+    <script type="module">
+        import { createClient } from "https://esm.sh/@supabase/supabase-js";
 
-    <main>
-      <section>
-        <h2>Listado de Estudiantes</h2>
+        const supabaseUrl = "https://nczlzsxuzadgtskeclxx.supabase.co";
+        const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jemx6c3h1emFkZ3Rza2VjbHh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5OTc1NTAsImV4cCI6MjA3OTU3MzU1MH0.VknukOGF5w_iX-J7KR_zLzEBo_PGVvNl1XOqRkAtHpU";
+
+        const supabase = createClient(supabaseUrl, supabaseKey);
+
+        // -------------------------------
+        // Cargar estudiantes al iniciar
+        // -------------------------------
+        async function cargarEstudiantes() {
+            const tabla = document.getElementById("tabla-estudiantes");
+            tabla.innerHTML = ""; // Limpia la tabla
+
+            const { data, error } = await supabase.from("estudiantes").select("*");
+
+            if (error) {
+                console.error(error);
+                return;
+            }
+
+            data.forEach((est) => {
+                tabla.innerHTML += `
+                    <tr>
+                        <td>${est.id}</td>
+                        <td>${est.nombre}</td>
+                        <td>${est.carrera}</td>
+                        <td>${est.correo}</td>
+                        <td><button onclick="eliminarEstudiante(${est.id})">Eliminar</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        // -------------------------------
+        // Insertar estudiante
+        // -------------------------------
+        window.agregarEstudiante = async function () {
+            const nombre = document.getElementById("nombre").value;
+            const carrera = document.getElementById("carrera").value;
+            const correo = document.getElementById("correo").value;
+
+            const { error } = await supabase.from("estudiantes").insert([
+                { nombre, carrera, correo }
+            ]);
+
+            if (error) {
+                alert("Error al agregar");
+                console.log(error);
+                return;
+            }
+
+            alert("Estudiante agregado");
+            cargarEstudiantes();
+        };
+
+        // -------------------------------
+        // Eliminar estudiante
+        // -------------------------------
+        window.eliminarEstudiante = async function (id) {
+            const { error } = await supabase
+                .from("estudiantes")
+                .delete()
+                .eq("id", id);
+
+            if (error) {
+                alert("Error al eliminar");
+                return;
+            }
+
+            alert("Estudiante eliminado");
+            cargarEstudiantes();
+        };
+
+        // Cargar tabla al abrir la página
+        window.onload = cargarEstudiantes;
+    </script>
+</head>
+
+<body>
+
+<header>
+    <h1>Módulo de Estudiantes</h1>
+</header>
+
+<nav>
+    <a href="index.html">Inicio</a>
+    <a href="estudiantes.html">Estudiantes</a>
+    <a href="cursos.html">Cursos</a>
+    <a href="profesores.html">Profesores</a>
+</nav>
+
+<main>
+    <section>
+        <h2>Agregar Estudiante</h2>
+
+        <form onsubmit="event.preventDefault(); agregarEstudiante();">
+            <label>Nombre:</label>
+            <input type="text" id="nombre" required />
+
+            <label>Carrera:</label>
+            <input type="text" id="carrera" required />
+
+            <label>Correo:</label>
+            <input type="email" id="correo" required />
+
+            <button type="submit">Agregar</button>
+        </form>
+    </section>
+
+    <hr />
+
+    <section>
+        <h2>Lista de Estudiantes</h2>
+
         <table>
-          <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Carrera</th>
-            <th>Correo</th>
-          </tr>
-          <tr>
-            <td>1</td>
-            <td>María López</td>
-            <td>Ingeniería</td>
-            <td>maria@uc.ac.cr</td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>Carlos Jiménez</td>
-            <td>Administración</td>
-            <td>carlos@uc.ac.cr</td>
-          </tr>
-          <tr>
-            <td>3</td>
-            <td>Andrea Solís</td>
-            <td>Diseño Gráfico</td>
-            <td>andrea@uc.ac.cr</td>
-          </tr>
-        </table>
-      </section>
-    </main>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Carrera</th>
+                    <th>Correo</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
 
-    <footer>
-      <p>&copy; 2025 Universidad Central</p>
-    </footer>
-  </body>
+            <tbody id="tabla-estudiantes"></tbody>
+        </table>
+    </section>
+</main>
+
+<footer>
+    <p>Universidad Central - Sistema Académico</p>
+</footer>
+
+</body>
 </html>

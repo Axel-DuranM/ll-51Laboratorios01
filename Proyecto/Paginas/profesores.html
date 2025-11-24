@@ -1,10 +1,91 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <title>Profesores - Universidad Central</title>
     <link rel="stylesheet" href="/Proyecto/CSS/estilos.css" />
+
+    <!-- Supabase -->
+    <script type="module">
+      import { createClient } from "https://esm.sh/@supabase/supabase-js";
+
+      const supabaseUrl = "https://nczlzsxuzadgtskeclxx.supabase.co";
+      const supabaseKey =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jemx6c3h1emFkZ3Rza2VjbHh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5OTc1NTAsImV4cCI6MjA3OTU3MzU1MH0.VknukOGF5w_iX-J7KR_zLzEBo_PGVvNl1XOqRkAtHpU";
+
+      const supabase = createClient(supabaseUrl, supabaseKey);
+
+      // -------------------------------
+      // Cargar profesores
+      // -------------------------------
+      async function cargarProfesores() {
+        const tabla = document.getElementById("tabla-profesores");
+        tabla.innerHTML = "";
+
+        const { data, error } = await supabase.from("profesores").select("*");
+
+        if (error) {
+          console.error(error);
+          return;
+        }
+
+        data.forEach((prof) => {
+          tabla.innerHTML += `
+            <tr>
+              <td>${prof.id}</td>
+              <td>${prof.nombre}</td>
+              <td>${prof.departamento}</td>
+              <td>${prof.correo}</td>
+              <td><button onclick="eliminarProfesor(${prof.id})">Eliminar</button></td>
+            </tr>
+          `;
+        });
+      }
+
+      // -------------------------------
+      // Agregar profesor
+      // -------------------------------
+      window.agregarProfesor = async function () {
+        const nombre = document.getElementById("nombre").value;
+        const departamento = document.getElementById("departamento").value;
+        const correo = document.getElementById("correo").value;
+
+        const { error } = await supabase
+          .from("profesores")
+          .insert([{ nombre, departamento, correo }]);
+
+        if (error) {
+          alert("Error al agregar profesor");
+          console.log(error);
+          return;
+        }
+
+        alert("Profesor agregado");
+        cargarProfesores();
+      };
+
+      // -------------------------------
+      // Eliminar profesor
+      // -------------------------------
+      window.eliminarProfesor = async function (id) {
+        const { error } = await supabase
+          .from("profesores")
+          .delete()
+          .eq("id", id);
+
+        if (error) {
+          alert("Error al eliminar");
+          return;
+        }
+
+        alert("Profesor eliminado");
+        cargarProfesores();
+      };
+
+      window.onload = cargarProfesores;
+    </script>
   </head>
+
   <body>
     <header>
       <h1>Módulo de Profesores</h1>
@@ -19,32 +100,35 @@
 
     <main>
       <section>
+        <h2>Agregar Profesor</h2>
+
+        <form onsubmit="event.preventDefault(); agregarProfesor();">
+          <label>Nombre:</label>
+          <input type="text" id="nombre" required />
+
+          <label>Departamento:</label>
+          <input type="text" id="departamento" required />
+
+          <label>Correo:</label>
+          <input type="email" id="correo" required />
+
+          <button type="submit">Agregar</button>
+        </form>
+      </section>
+
+      <section>
         <h2>Listado de Profesores</h2>
+
         <table>
           <tr>
             <th>ID</th>
             <th>Nombre</th>
             <th>Departamento</th>
             <th>Correo</th>
+            <th>Acciones</th>
           </tr>
-          <tr>
-            <td>01</td>
-            <td>Juan Pérez</td>
-            <td>Informática</td>
-            <td>juanp@uc.ac.cr</td>
-          </tr>
-          <tr>
-            <td>02</td>
-            <td>Laura Gómez</td>
-            <td>Diseño</td>
-            <td>laurag@uc.ac.cr</td>
-          </tr>
-          <tr>
-            <td>03</td>
-            <td>Ricardo Soto</td>
-            <td>Administración</td>
-            <td>ricardos@uc.ac.cr</td>
-          </tr>
+
+          <tbody id="tabla-profesores"></tbody>
         </table>
       </section>
     </main>
