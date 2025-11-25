@@ -48,3 +48,5 @@ document.querySelector("#form-curso").addEventListener("submit", async (e) => {
         e.target.reset();
     }
 });
+
+
