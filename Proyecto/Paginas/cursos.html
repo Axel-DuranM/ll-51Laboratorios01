@@ -1,125 +1,179 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Cursos - Universidad Central</title>
-    <link rel="stylesheet" href="/Proyecto/CSS/estilos.css" />
+<head>
+  <meta charset="UTF-8" />
+  <title>Cursos - Universidad Central</title>
 
-    <!-- Supabase -->
-    <script type="module">
-      import { createClient } from "https://esm.sh/@supabase/supabase-js";
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
 
-      const supabaseUrl = "https://nczlzsxuzadgtskeclxx.supabase.co";
-      const supabaseKey ="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jemx6c3h1emFkZ3Rza2VjbHh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5OTc1NTAsImV4cCI6MjA3OTU3MzU1MH0.VknukOGF5w_iX-J7KR_zLzEBo_PGVvNl1XOqRkAtHpU";
+  <link rel="stylesheet" href="/Proyecto/CSS/estilos.css" />
 
-      const supabase = createClient(supabaseUrl, supabaseKey);
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js";
 
-      // --------------------------
-      // Cargar cursos
-      // --------------------------
-      async function cargarCursos() {
-        const tabla = document.getElementById("tabla-cursos");
-        tabla.innerHTML = "";
+    const supabaseUrl = "https://nczlzsxuzadgtskeclxx.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jemx6c3h1emFkZ3Rza2VjbHh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5OTc1NTAsImV4cCI6MjA3OTU3MzU1MH0.VknukOGF5w_iX-J7KR_zLzEBo_PGVvNl1XOqRkAtHpU";
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
-        const { data, error } = await supabase.from("cursos").select("*");
+    let cursoEditando = null;
 
-        if (error) {
-          console.error(error);
-          return;
-        }
+    async function cargarCursos() {
+      const { data, error } = await supabase.from("cursos").select("*");
+      if (error) return console.error(error);
+      mostrarCursos(data);
+    }
 
-        data.forEach((curso) => {
-          tabla.innerHTML += `
-            <tr>
-              <td>${curso.codigo}</td>
-              <td>${curso.nombre}</td>
-              <td>${curso.creditos}</td>
-              <td>${curso.profesor}</td>
-              <td><button onclick="eliminarCurso(${curso.id})">Eliminar</button></td>
-            </tr>
-          `;
-        });
+    function mostrarCursos(cursos) {
+      const tabla = document.getElementById("tabla-cursos");
+      tabla.innerHTML = "";
+
+      cursos.forEach(curso => {
+        tabla.innerHTML += `
+          <tr>
+            <td>${curso.codigo}</td>
+            <td>${curso.nombre}</td>
+            <td>${curso.creditos}</td>
+            <td>${curso.profesor}</td>
+            <td>
+              <button class="btn btn-warning btn-sm me-1"
+                onclick="editarCurso(${curso.id}, '${curso.codigo}', '${curso.nombre}', ${curso.creditos}, '${curso.profesor}')">
+                Editar
+              </button>
+              <button class="btn btn-danger btn-sm"
+                onclick="eliminarCurso(${curso.id})">
+                Eliminar
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    window.agregarOActualizarCurso = async function () {
+      const codigo = document.getElementById("codigo").value;
+      const nombre = document.getElementById("nombre").value;
+      const creditos = document.getElementById("creditos").value;
+      const profesor = document.getElementById("profesor").value;
+
+      if (cursoEditando) {
+        await supabase
+          .from("cursos")
+          .update({ codigo, nombre, creditos, profesor })
+          .eq("id", cursoEditando);
+      } else {
+        await supabase
+          .from("cursos")
+          .insert([{ codigo, nombre, creditos, profesor }]);
       }
 
-      // --------------------------
-      // Agregar curso
-      // --------------------------
-      window.agregarCurso = async function () {
-        const codigo = document.getElementById("codigo").value;
-        const nombre = document.getElementById("nombre").value;
-        const creditos = document.getElementById("creditos").value;
-        const profesor = document.getElementById("profesor").value;
+      document.querySelector("form").reset();
+      cursoEditando = null;
+      document.getElementById("btn-curso").textContent = "Agregar Curso";
+      cargarCursos();
+    };
 
-        const { error } = await supabase.from("cursos").insert([
-          { codigo, nombre, creditos, profesor },
-        ]);
+    window.editarCurso = function (id, codigo, nombre, creditos, profesor) {
+      cursoEditando = id;
+      document.getElementById("codigo").value = codigo;
+      document.getElementById("nombre").value = nombre;
+      document.getElementById("creditos").value = creditos;
+      document.getElementById("profesor").value = profesor;
+      document.getElementById("btn-curso").textContent = "Actualizar Curso";
+    };
 
-        if (error) {
-          alert("Error al agregar el curso");
-          console.log(error);
-          return;
-        }
+    window.eliminarCurso = async function (id) {
+      if (!confirm("¿Eliminar este curso?")) return;
+      await supabase.from("cursos").delete().eq("id", id);
+      cargarCursos();
+    };
 
-        alert("Curso agregado");
-        cargarCursos();
-      };
+    window.filtrarCursos = async function () {
+      const texto = document.getElementById("busqueda").value.toLowerCase();
+      const { data } = await supabase.from("cursos").select("*");
 
-      // --------------------------
-      // Eliminar curso
-      // --------------------------
-      window.eliminarCurso = async function (id) {
-        const { error } = await supabase.from("cursos").delete().eq("id", id);
+      const filtrados = data.filter(c =>
+        c.nombre.toLowerCase().includes(texto) ||
+        c.profesor.toLowerCase().includes(texto)
+      );
 
-        if (error) {
-          alert("Error al eliminar");
-          return;
-        }
+      mostrarCursos(filtrados);
+    };
 
-        alert("Curso eliminado");
-        cargarCursos();
-      };
+    window.onload = cargarCursos;
+  </script>
+</head>
 
-      window.onload = cargarCursos;
-    </script>
-  </head>
+<body>
 
-  <body>
-    <header>
-      <h1>Módulo de Cursos</h1>
-    </header>
+<header class="header-principal text-center py-4">
+  <h1>Cursos</h1>
+  <p>Universidad Central</p>
+</header>
 
-    <nav>
-      <a href="index.html">Inicio</a>
-      <a href="estudiantes.html">Estudiantes</a>
-      <a href="cursos.html">Cursos</a>
-      <a href="profesores.html">Profesores</a>
-    </nav>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    <a class="navbar-brand" href="/Proyecto/Paginas/index.html">UC</a>
+    <div class="collapse navbar-collapse show">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
+        <li class="nav-item"><a class="nav-link" href="estudiantes.html">Estudiantes</a></li>
+        <li class="nav-item"><a class="nav-link active" href="cursos.html">Cursos</a></li>
+        <li class="nav-item"><a class="nav-link" href="profesores.html">Profesores</a></li>
+      </ul>
+      <a href="login.html" class="btn btn-outline-light">Salir</a>
+    </div>
+  </div>
+</nav>
 
-    <main>
-      <section>
-        <h2>Agregar Curso</h2>
+<main class="container my-5">
 
-        <form onsubmit="event.preventDefault(); agregarCurso();">
-          <label>Código:</label>
-          <input type="text" id="codigo" required />
+  <!-- FORMULARIO -->
+  <section class="card shadow mb-5">
+    <div class="card-header bg-primary text-white">Registro / Edición de Cursos</div>
+    <div class="card-body">
+      <form onsubmit="event.preventDefault(); agregarOActualizarCurso();">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label class="form-label">Código</label>
+            <input type="text" id="codigo" class="form-control" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Nombre</label>
+            <input type="text" id="nombre" class="form-control" required>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Créditos</label>
+            <input type="number" id="creditos" min="1" class="form-control" required>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Profesor</label>
+            <input type="text" id="profesor" class="form-control" required>
+          </div>
+        </div>
+        <div class="mt-4 text-end">
+          <button id="btn-curso" class="btn btn-success">
+            Agregar Curso
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
 
-          <label>Nombre del Curso:</label>
-          <input type="text" id="nombre" required />
+  <!-- BUSQUEDA -->
+  <input
+    type="text"
+    id="busqueda"
+    class="form-control mb-3"
+    placeholder="Buscar por nombre o profesor..."
+    onkeyup="filtrarCursos()"
+  >
 
-          <label>Créditos:</label>
-          <input type="number" id="creditos" min="1" required />
-
-          <label>Profesor:</label>
-          <input type="text" id="profesor" required />
-
-          <button type="submit">Agregar</button>
-        </form>
-      </section>
-
-      <section>
-        <h2>Listado de Cursos</h2>
-
-        <table>
+  <!-- TABLA -->
+  <section class="card shadow">
+    <div class="card-header bg-dark text-white">Listado de Cursos</div>
+    <div class="card-body table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-primary">
           <tr>
             <th>Código</th>
             <th>Nombre</th>
@@ -127,14 +181,17 @@
             <th>Profesor</th>
             <th>Acciones</th>
           </tr>
+        </thead>
+        <tbody id="tabla-cursos"></tbody>
+      </table>
+    </div>
+  </section>
 
-          <tbody id="tabla-cursos"></tbody>
-        </table>
-      </section>
-    </main>
+</main>
 
-    <footer>
-      <p>&copy; 2025 Universidad Central</p>
-    </footer>
-  </body>
+<footer class="text-center py-3">
+  <p>&copy; 2025 Universidad Central</p>
+</footer>
+
+</body>
 </html>

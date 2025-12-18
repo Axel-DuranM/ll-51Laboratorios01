@@ -1,145 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <title>Estudiantes - Universidad Central</title>
-    <link rel="stylesheet" href="/Proyecto/CSS/estilos.css" />
+  <meta charset="UTF-8" />
+  <title>Estudiantes - Universidad Central</title>
 
-    <!-- Importar Supabase -->
-    <script type="module">
-        import { createClient } from "https://esm.sh/@supabase/supabase-js";
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
 
-        const supabaseUrl = "https://nczlzsxuzadgtskeclxx.supabase.co";
-        const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jemx6c3h1emFkZ3Rza2VjbHh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5OTc1NTAsImV4cCI6MjA3OTU3MzU1MH0.VknukOGF5w_iX-J7KR_zLzEBo_PGVvNl1XOqRkAtHpU";
+  <link rel="stylesheet" href="/Proyecto/CSS/estilos.css" />
 
-        const supabase = createClient(supabaseUrl, supabaseKey);
+  <!-- Supabase -->
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js";
 
-        // -------------------------------
-        // Cargar estudiantes al iniciar
-        // -------------------------------
-        async function cargarEstudiantes() {
-            const tabla = document.getElementById("tabla-estudiantes");
-            tabla.innerHTML = ""; // Limpia la tabla
+    const supabaseUrl = "https://nczlzsxuzadgtskeclxx.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jemx6c3h1emFkZ3Rza2VjbHh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5OTc1NTAsImV4cCI6MjA3OTU3MzU1MH0.VknukOGF5w_iX-J7KR_zLzEBo_PGVvNl1XOqRkAtHpU"; // ← deja la tuya
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
-            const { data, error } = await supabase.from("estudiantes").select("*");
+    let estudianteEditando = null;
 
-            if (error) {
-                console.error(error);
-                return;
-            }
+    async function cargarEstudiantes() {
+      const { data, error } = await supabase.from("estudiantes").select("*");
+      if (error) return console.error(error);
+      mostrarEstudiantes(data);
+    }
 
-            data.forEach((est) => {
-                tabla.innerHTML += `
-                    <tr>
-                        <td>${est.id}</td>
-                        <td>${est.nombre}</td>
-                        <td>${est.carrera}</td>
-                        <td>${est.correo}</td>
-                        <td><button onclick="eliminarEstudiante(${est.id})">Eliminar</button></td>
-                    </tr>
-                `;
-            });
-        }
+    function mostrarEstudiantes(estudiantes) {
+      const tabla = document.getElementById("tabla-estudiantes");
+      tabla.innerHTML = "";
 
-        // -------------------------------
-        // Insertar estudiante
-        // -------------------------------
-        window.agregarEstudiante = async function () {
-            const nombre = document.getElementById("nombre").value;
-            const carrera = document.getElementById("carrera").value;
-            const correo = document.getElementById("correo").value;
+      estudiantes.forEach(est => {
+        tabla.innerHTML += `
+          <tr>
+            <td>${est.id}</td>
+            <td>${est.nombre}</td>
+            <td>${est.carrera}</td>
+            <td>${est.correo}</td>
+            <td>
+              <button class="btn btn-warning btn-sm me-1"
+                onclick="editarEstudiante(${est.id}, '${est.nombre}', '${est.carrera}', '${est.correo}')">
+                Editar
+              </button>
+              <button class="btn btn-danger btn-sm"
+                onclick="eliminarEstudiante(${est.id})">
+                Eliminar
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+    }
 
-            const { error } = await supabase.from("estudiantes").insert([
-                { nombre, carrera, correo }
-            ]);
+    window.agregarOActualizar = async function () {
+      const nombre = document.getElementById("nombre").value;
+      const carrera = document.getElementById("carrera").value;
+      const correo = document.getElementById("correo").value;
 
-            if (error) {
-                alert("Error al agregar");
-                console.log(error);
-                return;
-            }
+      if (estudianteEditando) {
+        await supabase
+          .from("estudiantes")
+          .update({ nombre, carrera, correo })
+          .eq("id", estudianteEditando);
+      } else {
+        await supabase
+          .from("estudiantes")
+          .insert([{ nombre, carrera, correo }]);
+      }
 
-            alert("Estudiante agregado");
-            cargarEstudiantes();
-        };
+      document.querySelector("form").reset();
+      estudianteEditando = null;
+      document.getElementById("btn-form").textContent = "Agregar Estudiante";
+      cargarEstudiantes();
+    };
 
-        // -------------------------------
-        // Eliminar estudiante
-        // -------------------------------
-        window.eliminarEstudiante = async function (id) {
-            const { error } = await supabase
-                .from("estudiantes")
-                .delete()
-                .eq("id", id);
+    window.editarEstudiante = function (id, nombre, carrera, correo) {
+      estudianteEditando = id;
+      document.getElementById("nombre").value = nombre;
+      document.getElementById("carrera").value = carrera;
+      document.getElementById("correo").value = correo;
+      document.getElementById("btn-form").textContent = "Actualizar Estudiante";
+    };
 
-            if (error) {
-                alert("Error al eliminar");
-                return;
-            }
+    window.eliminarEstudiante = async function (id) {
+      if (!confirm("¿Eliminar estudiante?")) return;
+      await supabase.from("estudiantes").delete().eq("id", id);
+      cargarEstudiantes();
+    };
 
-            alert("Estudiante eliminado");
-            cargarEstudiantes();
-        };
+    window.filtrarEstudiantes = async function () {
+      const texto = document.getElementById("busqueda").value.toLowerCase();
+      const { data } = await supabase.from("estudiantes").select("*");
+      const filtrados = data.filter(e =>
+        e.nombre.toLowerCase().includes(texto) ||
+        e.carrera.toLowerCase().includes(texto)
+      );
+      mostrarEstudiantes(filtrados);
+    };
 
-        // Cargar tabla al abrir la página
-        window.onload = cargarEstudiantes;
-    </script>
+    window.onload = cargarEstudiantes;
+  </script>
 </head>
 
 <body>
 
-<header>
-    <h1>Módulo de Estudiantes</h1>
+<header class="header-principal text-center py-4">
+  <h1>Estudiantes</h1>
+  <p>Universidad Central</p>
 </header>
 
-<nav>
-    <a href="index.html">Inicio</a>
-    <a href="estudiantes.html">Estudiantes</a>
-    <a href="cursos.html">Cursos</a>
-    <a href="profesores.html">Profesores</a>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    <a class="navbar-brand" href="./index.html">UC</a>
+    <div class="collapse navbar-collapse show">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="/Proyecto/Paginas/index.html">Inicio</a></li>
+        <li class="nav-item"><a class="nav-link active" href="./estudiantes.html">Estudiantes</a></li>
+        <li class="nav-item"><a class="nav-link" href="./cursos.html">Cursos</a></li>
+        <li class="nav-item"><a class="nav-link" href="./profesores.html">Profesores</a></li>
+      </ul>
+      <a href="./Login.html" class="btn btn-outline-light">Salir</a>
+    </div>
+  </div>
 </nav>
 
-<main>
-    <section>
-        <h2>Agregar Estudiante</h2>
+<main class="container my-5">
 
-        <form onsubmit="event.preventDefault(); agregarEstudiante();">
-            <label>Nombre:</label>
-            <input type="text" id="nombre" required />
+  <!-- FORMULARIO -->
+  <section class="card shadow mb-5">
+    <div class="card-header bg-primary text-white">Registro / Edición</div>
+    <div class="card-body">
+      <form onsubmit="event.preventDefault(); agregarOActualizar();">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">Nombre</label>
+            <input type="text" id="nombre" class="form-control" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Carrera</label>
+            <input type="text" id="carrera" class="form-control" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Correo</label>
+            <input type="email" id="correo" class="form-control" required>
+          </div>
+        </div>
+        <div class="mt-4 text-end">
+          <button id="btn-form" class="btn btn-success">
+            Agregar Estudiante
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
 
-            <label>Carrera:</label>
-            <input type="text" id="carrera" required />
+  <!-- BUSQUEDA -->
+  <input
+    type="text"
+    id="busqueda"
+    class="form-control mb-3"
+    placeholder="Buscar por nombre o carrera..."
+    onkeyup="filtrarEstudiantes()"
+  >
 
-            <label>Correo:</label>
-            <input type="email" id="correo" required />
+  <!-- TABLA -->
+  <section class="card shadow">
+    <div class="card-header bg-dark text-white">Lista de Estudiantes</div>
+    <div class="card-body table-responsive">
+      <table class="table table-hover">
+        <thead class="table-primary">
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Carrera</th>
+            <th>Correo</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-estudiantes"></tbody>
+      </table>
+    </div>
+  </section>
 
-            <button type="submit">Agregar</button>
-        </form>
-    </section>
-
-    <hr />
-
-    <section>
-        <h2>Lista de Estudiantes</h2>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Carrera</th>
-                    <th>Correo</th>
-                    <th>Acción</th>
-                </tr>
-            </thead>
-
-            <tbody id="tabla-estudiantes"></tbody>
-        </table>
-    </section>
 </main>
 
-<footer>
-    <p>Universidad Central - Sistema Académico</p>
+<footer class="text-center py-3">
+  <p>&copy; 2025 Universidad Central</p>
 </footer>
 
 </body>

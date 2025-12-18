@@ -1,140 +1,246 @@
 <!DOCTYPE html>
-<html lang="es">
-  <head>
+<html lang="en">
+<head>
     <meta charset="UTF-8" />
     <title>Profesores - Universidad Central</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <link rel="stylesheet" href="/Proyecto/CSS/estilos.css" />
 
-    <!-- Supabase -->
     <script type="module">
-      import { createClient } from "https://esm.sh/@supabase/supabase-js";
+        import { createClient } from "https://esm.sh/@supabase/supabase-js";
 
-      const supabaseUrl = "https://nczlzsxuzadgtskeclxx.supabase.co";
-      const supabaseKey =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jemx6c3h1emFkZ3Rza2VjbHh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5OTc1NTAsImV4cCI6MjA3OTU3MzU1MH0.VknukOGF5w_iX-J7KR_zLzEBo_PGVvNl1XOqRkAtHpU";
+        const supabaseUrl = "https://nczlzsxuzadgtskeclxx.supabase.co";
+        const supabaseKey ="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jemx6c3h1emFkZ3Rza2VjbHh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5OTc1NTAsImV4cCI6MjA3OTU3MzU1MH0.VknukOGF5w_iX-J7KR_zLzEBo_PGVvNl1XOqRkAtHpU";
 
-      const supabase = createClient(supabaseUrl, supabaseKey);
+        const supabase = createClient(supabaseUrl, supabaseKey);
 
-      // -------------------------------
-      // Cargar profesores
-      // -------------------------------
-      async function cargarProfesores() {
-        const tabla = document.getElementById("tabla-profesores");
-        tabla.innerHTML = "";
+        //Variable para controlar edición
+        let idEditando = null;
 
-        const { data, error } = await supabase.from("profesores").select("*");
+        async function cargarProfesores() {
+            const tabla = document.getElementById("tabla-profesores");
+            tabla.innerHTML = "";
 
-        if (error) {
-          console.error(error);
-          return;
+            const { data, error } = await supabase
+                .from("profesores")
+                .select("*")
+                .order("id", { ascending: true });
+
+            if (error) {
+                console.error(error);
+                return;
+            }
+
+            data.forEach(prof => {
+                tabla.innerHTML += `
+                    <tr>
+                        <td>${prof.id}</td>
+                        <td>${prof.nombre}</td>
+                        <td>${prof.departamento}</td>
+                        <td>${prof.correo}</td>
+                        <td>
+                            <button class="btn btn-warning btn-sm me-1"
+                                onclick="editarProfesor(${prof.id}, '${prof.nombre}', '${prof.departamento}', '${prof.correo}')">
+                                Editar
+                            </button>
+                            <button class="btn btn-danger btn-sm"
+                                onclick="eliminarProfesor(${prof.id})">
+                                Eliminar
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
         }
 
-        data.forEach((prof) => {
-          tabla.innerHTML += `
-            <tr>
-              <td>${prof.id}</td>
-              <td>${prof.nombre}</td>
-              <td>${prof.departamento}</td>
-              <td>${prof.correo}</td>
-              <td><button onclick="eliminarProfesor(${prof.id})">Eliminar</button></td>
-            </tr>
-          `;
-        });
-      }
+        //INSERTAR o ACTUALIZAR
+        window.guardarProfesor = async function () {
+            const nombre = document.getElementById("nombre").value;
+            const departamento = document.getElementById("departamento").value;
+            const correo = document.getElementById("correo").value;
 
-      // -------------------------------
-      // Agregar profesor
-      // -------------------------------
-      window.agregarProfesor = async function () {
-        const nombre = document.getElementById("nombre").value;
-        const departamento = document.getElementById("departamento").value;
-        const correo = document.getElementById("correo").value;
+            if (idEditando === null) {
+                // INSERT
+                const { error } = await supabase
+                    .from("profesores")
+                    .insert([{ nombre, departamento, correo }]);
 
-        const { error } = await supabase
-          .from("profesores")
-          .insert([{ nombre, departamento, correo }]);
+                if (error) {
+                    alert("Error al agregar profesor");
+                    return;
+                }
+            } else {
+                // UPDATE
+                const { error } = await supabase
+                    .from("profesores")
+                    .update({ nombre, departamento, correo })
+                    .eq("id", idEditando);
 
-        if (error) {
-          alert("Error al agregar profesor");
-          console.log(error);
-          return;
-        }
+                if (error) {
+                    alert("Error al actualizar profesor");
+                    return;
+                }
 
-        alert("Profesor agregado");
-        cargarProfesores();
-      };
+                idEditando = null;
+                document.getElementById("btn-guardar").textContent = "Agregar Profesor";
+            }
 
-      // -------------------------------
-      // Eliminar profesor
-      // -------------------------------
-      window.eliminarProfesor = async function (id) {
-        const { error } = await supabase
-          .from("profesores")
-          .delete()
-          .eq("id", id);
+            document.querySelector("form").reset();
+            cargarProfesores();
+        };
 
-        if (error) {
-          alert("Error al eliminar");
-          return;
-        }
+        window.eliminarProfesor = async function (id) {
+            const confirmar = confirm("¿Desea eliminar este profesor?");
+            if (!confirmar) return;
 
-        alert("Profesor eliminado");
-        cargarProfesores();
-      };
+            await supabase.from("profesores").delete().eq("id", id);
+            cargarProfesores();
+        };
 
-      window.onload = cargarProfesores;
+        window.editarProfesor = function (id, nombre, departamento, correo) {
+            document.getElementById("nombre").value = nombre;
+            document.getElementById("departamento").value = departamento;
+            document.getElementById("correo").value = correo;
+
+            idEditando = id;
+            document.getElementById("btn-guardar").textContent = "Actualizar Profesor";
+        };
+
+        window.filtrarProfesores = function () {
+            const texto = document.getElementById("buscador").value.toLowerCase();
+            const filas = document.querySelectorAll("#tabla-profesores tr");
+
+            filas.forEach(fila => {
+                const nombre = fila.children[1].textContent.toLowerCase();
+                const departamento = fila.children[2].textContent.toLowerCase();
+
+                fila.style.display =
+                    nombre.includes(texto) || departamento.includes(texto)
+                        ? ""
+                        : "none";
+            });
+        };
+
+        window.onload = cargarProfesores;
     </script>
-  </head>
+</head>
 
-  <body>
-    <header>
-      <h1>Módulo de Profesores</h1>
-    </header>
+<body>
 
-    <nav>
-      <a href="index.html">Inicio</a>
-      <a href="estudiantes.html">Estudiantes</a>
-      <a href="cursos.html">Cursos</a>
-      <a href="profesores.html">Profesores</a>
-    </nav>
+<header class="header-principal text-center">
+    <h1>Profesores</h1>
+    <p>Universidad Central</p>
+</header>
 
-    <main>
-      <section>
-        <h2>Agregar Profesor</h2>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="#">UC</a>
 
-        <form onsubmit="event.preventDefault(); agregarProfesor();">
-          <label>Nombre:</label>
-          <input type="text" id="nombre" required />
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-          <label>Departamento:</label>
-          <input type="text" id="departamento" required />
+        <div class="collapse navbar-collapse" id="menu">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="/Proyecto/Paginas/index.html">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Proyecto/Paginas/estudiantes.html">Estudiantes</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Proyecto/Paginas/cursos.html">Cursos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/Proyecto/Paginas/profesores.html">Profesores</a>
+                </li>
+            </ul>
 
-          <label>Correo:</label>
-          <input type="email" id="correo" required />
+            <a href="/Proyecto/Paginas/login.html" class="btn btn-outline-light">
+                Salir
+            </a>
+        </div>
+    </div>
+</nav>
 
-          <button type="submit">Agregar</button>
-        </form>
-      </section>
+<main class="container my-5">
 
-      <section>
-        <h2>Listado de Profesores</h2>
+    <!-- FORMULARIO -->
+    <section class="mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                Gestión de Profesores
+            </div>
 
-        <table>
-          <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Departamento</th>
-            <th>Correo</th>
-            <th>Acciones</th>
-          </tr>
+            <div class="card-body">
+                <form onsubmit="event.preventDefault(); guardarProfesor();">
 
-          <tbody id="tabla-profesores"></tbody>
-        </table>
-      </section>
-    </main>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Nombre</label>
+                            <input type="text" id="nombre" class="form-control" required>
+                        </div>
 
-    <footer>
-      <p>&copy; 2025 Universidad Central</p>
-    </footer>
-  </body>
+                        <div class="col-md-4">
+                            <label class="form-label">Departamento</label>
+                            <input type="text" id="departamento" class="form-control" required>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Correo</label>
+                            <input type="email" id="correo" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 text-end">
+                        <button type="submit" class="btn btn-success" id="btn-guardar">
+                            Agregar Profesor
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- BUSCADOR -->
+    <div class="mb-3">
+        <input type="text" id="buscador" class="form-control"
+               placeholder="Buscar por nombre o departamento..."
+               onkeyup="filtrarProfesores()">
+    </div>
+
+    <!-- TABLA -->
+    <section>
+        <div class="card shadow">
+            <div class="card-header bg-dark text-white">
+                Listado de Profesores
+            </div>
+
+            <div class="card-body table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Departamento</th>
+                            <th>Correo</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-profesores"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<footer class="text-center py-3">
+    <p>&copy; 2025 Universidad Central</p>
+</footer>
+
+</body>
 </html>

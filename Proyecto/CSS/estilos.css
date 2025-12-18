@@ -1,120 +1,120 @@
-/*  Estilos Generales  */
+/* ===============================
+   ESTILOS GENERALES
+================================ */
 body {
     font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
+    background-color: #f4f6f9;
     margin: 0;
 }
 
+/* ===============================
+   HEADER
+================================ */
 header {
-    background-color: #004080;
+    background: linear-gradient(135deg, #004080, #0066cc);
     color: white;
-    padding: 15px;
+    padding: 25px;
     text-align: center;
 }
 
 header h1 {
     margin: 0;
+    font-size: 2.2rem;
 }
 
+/* ===============================
+   NAV
+================================ */
 nav {
-    background-color: #0066cc;
+    background-color: #003366;
     text-align: center;
-    padding: 10px;
+    padding: 12px;
 }
 
 nav a {
     color: white;
     text-decoration: none;
-    margin: 10px;
+    margin: 10px 15px;
     font-weight: bold;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: background-color 0.3s;
 }
 
 nav a:hover {
-    text-decoration: underline;
+    background-color: #0059b3;
+    text-decoration: none;
 }
 
+/* ===============================
+   MAIN
+================================ */
 main {
-    padding: 30px;
+    padding: 40px;
 }
 
-/* Login  */
-.login {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 40px;
+/* =========================
+   LOGIN
+========================= */
+
+.login-body {
+    background: linear-gradient(135deg, #083880, #9c1ea0);
 }
 
 .login-card {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    width: 300px;
-    box-shadow: 0 0 10px gray;
+    border-radius: 20px;
+    overflow: hidden;
 }
 
-.login-card h2 {
-    text-align: center;
+.login-header {
+    background: linear-gradient(135deg, #0d6efd, #0b5ed7);
 }
 
-.login-card input {
-    width: 100%;
-    padding: 8px;
-    margin: 5px 0 10px 0;
-    border: 1px solid hsl(0, 0%, 80%);
-    border-radius: 4px;
+.login-card .form-control {
+    border-radius: 10px;
 }
 
-.login-card button {
-    background-color: #004080;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    width: 100%;
-    cursor: pointer;
-    font-size: 15px;
+.login-card .btn {
+    border-radius: 10px;
 }
 
-.login-card button:hover {
-    background-color: #003060;
-}
-
-/* Diagrama UML */
+/* ===============================
+   UML
+================================ */
 .uml {
     background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px gray;
-    margin-bottom: 40px;
-    text-align: center; 
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    margin-bottom: 50px;
+    text-align: center;
 }
 
 .uml h2 {
-    text-align: center;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .uml img {
-    max-width: 50%; 
-    height: 800px;
-    width: 600px;
+    max-width: 100%;
+    height: auto;
     border: 1px solid #ccc;
-    border-radius: 5px;
-    display: inline-block;
+    border-radius: 8px;
 }
 
-/*Tablas (Estudiantes, Cursos, Profesores) */
-
+/* ===============================
+   TABLAS
+================================ */
 table {
     width: 100%;
     border-collapse: collapse;
-    text-align: left;
+    background-color: white;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
 }
 
 th,
 td {
     border: 1px solid #ccc;
-    padding: 10px;
+    padding: 12px;
 }
 
 th {
@@ -123,13 +123,16 @@ th {
 }
 
 tr:hover {
-    background-color: #ffe7e6;
+    background-color: #e6f0ff;
 }
 
-/* Footer */
+/* ===============================
+   FOOTER
+================================ */
 footer {
-    background-color: #004080;
+    background-color: #003366;
     color: white;
     text-align: center;
-    padding: 10px;
+    padding: 15px;
+    margin-top: 40px;
 }
